@@ -1,45 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { Chart, ChartDataItem, DataPoint } from "./Chart";
 
-const parseData = (data: Uint8Array): DataPoint[] => {
+const parseData = (data: DataView): DataPoint[] => {
   const result: DataPoint[] = [];
 
   let idx = 0;
   do {
-    if (data[idx] !== 255) {
-      throw new Error(`Control byte is incorrect`);
+    if (data.getUint8(idx) !== 255) {
+      throw new Error(`Control byte is incorrect ${data.getInt8(idx)} `);
     }
 
-    const time =
-      data[idx + 1] +
-      data[idx + 2] * 256 +
-      data[idx + 3] * 256 * 256 +
-      data[idx + 4] * 256 * 256 * 256;
+    const time = data.getUint32(idx + 1, true);
 
     const date = new Date(time * 1000);
 
-    const t1 = data[idx + 5];
-    const t2 = data[idx + 6];
+    const t = data.getInt16(idx + 5, true) / 100;
+    const h = data.getUint8(idx + 7) / 100;
 
-    let tVal = t2 * 256 + t1;
-    // if negative
-    if (tVal > 32767) {
-      tVal -= 65536;
-    }
-
-    const t = tVal / 100;
-    const h = data[idx + 7] / 100;
-
-    const b1 = data[idx + 8];
-    const b2 = data[idx + 9];
-
-    const v = (b2 * 256 + b1) / 1000;
+    const v = data.getUint16(idx + 8, true) / 1000;
     const b = v - 2.1; // 3.1 or above --> 100% 2.1 --> 0 %
 
     result.push({ date, t, h, v, b });
 
     idx += 10;
-  } while (idx < data.length);
+  } while (idx < data.byteLength);
 
   return result;
 };
@@ -57,7 +41,7 @@ const App = () => {
           fetch(`/${i}`)
             .then((i) => i.blob())
             .then((i) => i.arrayBuffer())
-            .then((i) => parseData(new Uint8Array(i)))
+            .then((i) => parseData(new DataView(i)))
         )
       );
 
