@@ -78,7 +78,7 @@ http
       }
 
       const file = await readFile(filename, "binary");
-      response.writeHead(200, headersByExtension[fileExt] ?? {});
+      response.writeHead(200, headersByExtension[fileExt] || {});
       response.write(file, "binary");
       response.end();
     } catch (error) {
