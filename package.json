@@ -18,6 +18,9 @@
   },
   "homepage": "https://github.com/evgsil/humon#readme",
   "dependencies": {
-    "node-ble": "^1.9.0"
+    "@tuyapi/driver": "^0.0.6",
+    "input-event": "^1.2.6",
+    "node-ble": "^1.9.0",
+    "tuyapi": "github:codetheweb/tuyapi"
   }
 }
